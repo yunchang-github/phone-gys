@@ -5,19 +5,31 @@
         <van-icon name="home-o" class="goHome" @click="goHome"></van-icon
         ><span class="warehouse">默认仓库</span>
       </div>
-      <div  v-if="skuList.length > 0">{{ allocationNameSuccess }}</div>
+      <div v-if="skuList.length > 0">{{ allocationNameSuccess }}</div>
       <div class="userName">{{ username }}</div>
     </div>
     <div class="content">
       <div class="removeLocationInput">
-        货位:
-        <input
-          type="text"
-          ref="skuInput"
-          v-model.trim="allocationName"
-          placeholder="请扫描"
-          @keydown.enter="searchMainList"
-        />
+        <div style="margin-bottom: 10px">
+          <span class="labelClass">货位:</span>
+          <input
+            type="text"
+            ref="allocationNameInput"
+            v-model.trim="allocationName"
+            placeholder="请扫描"
+            @keydown.enter="searchMainListByAllocationName"
+          />
+        </div>
+        <div>
+          <span class="labelClass">SKU:</span>
+          <input
+            type="text"
+            ref="skuInput"
+            v-model.trim="sku"
+            placeholder="请扫描"
+            @keydown.enter="searchMainListBySku"
+          />
+        </div>
       </div>
       <div ref="searchContainerRef">
         <ul class="skuContent">
@@ -146,6 +158,7 @@ export default {
       warehouseId: process.env.VUE_APP_WAREHOUSEID,
       otherSkuShow: false,
       username: "", //用户名
+      sku: "",
       allocationName: "",
       allocationNameSuccess: "",
       skuList: [], // 数据
@@ -174,7 +187,7 @@ export default {
         if (flag === "many") {
           this.otherSkuShow = false;
         }
-        this.searchMainList();
+        this.renderTable();
       } catch (e) {
         console.log(e);
       }
@@ -191,6 +204,7 @@ export default {
       const data = {
         warehouseId: row.warehouseId,
         sku: row.sku,
+        allocationId: row.allocationId,
       };
       const res = await getInventoryListBySku(data);
       res.data.sort((a, b) => {
@@ -200,8 +214,41 @@ export default {
       });
       this.otherSkuList = res.data;
     },
-    // 查询仓位id 和对应的数据
-    async searchMainList() {
+    async renderTable() {
+      try {
+        Toast.loading({
+          message: "加载中...",
+          forbidClick: true,
+          loadingType: "spinner",
+          selector: this.$refs.searchContainerRef, // 或者直接传入 DOM 对象：selector: document.querySelector('#elementId')
+        });
+        let res = await getInventoryList({
+          warehouseId: this.warehouseId,
+          allocationName: this.allocationNameSuccess.trim(),
+          sku: this.sku.trim(),
+        });
+        if (res.data && res.data.length > 0) {
+          res.data.forEach((item) => {
+            item.isAllchecked = item.quantity !== item.totalQuantity;
+            item.adjustQty = item.quantity;
+          });
+          this.skuList = res.data;
+          this.$nextTick(() => {
+            Toast.clear();
+          });
+        } else {
+          this.initData();
+          Toast("暂无数据!");
+        }
+      } catch (e) {
+        console.log(e);
+        this.$nextTick(() => {
+          Toast.clear();
+        });
+      }
+    },
+    // 通过货位查询列表
+    async searchMainListByAllocationName() {
       if (this.allocationName && this.allocationName.trim()) {
         try {
           Toast.loading({
@@ -213,6 +260,7 @@ export default {
           let res = await getInventoryList({
             warehouseId: this.warehouseId,
             allocationName: this.allocationName.trim(),
+            sku: this.sku.trim(),
           });
           if (res.data && res.data.length > 0) {
             res.data.forEach((item) => {
@@ -220,7 +268,7 @@ export default {
               item.adjustQty = item.quantity;
             });
             this.skuList = res.data;
-            this.allocationNameSuccess = this.allocationName;
+            this.allocationNameSuccess = this.allocationName.trim();
             this.allocationName = "";
             this.$nextTick(() => {
               Toast.clear();
@@ -231,10 +279,52 @@ export default {
           }
         } catch (e) {
           console.log(e);
-          Toast.clear();
+          this.$nextTick(() => {
+            Toast.clear();
+          });
         }
       } else {
         Toast("请输入或扫描!");
+      }
+    },
+    // 通过sku查询列表
+    async searchMainListBySku() {
+      if (this.allocationNameSuccess || this.allocationName.trim()) {
+        try {
+          Toast.loading({
+            message: "加载中...",
+            forbidClick: true,
+            loadingType: "spinner",
+            selector: this.$refs.searchContainerRef, // 或者直接传入 DOM 对象：selector: document.querySelector('#elementId')
+          });
+          let res = await getInventoryList({
+            warehouseId: this.warehouseId,
+            allocationName: this.allocationNameSuccess || this.allocationName.trim(),
+            sku: this.sku.trim(),
+          });
+          if (res.data && res.data.length > 0) {
+            res.data.forEach((item) => {
+              item.isAllchecked = item.quantity !== item.totalQuantity;
+              item.adjustQty = item.quantity;
+            });
+            this.skuList = res.data;
+            this.sku = "";
+            this.allocationName = ""
+            this.$nextTick(() => {
+              Toast.clear();
+            });
+          } else {
+            this.initData();
+            Toast("暂无数据!");
+          }
+        } catch (e) {
+          console.log(e);
+          this.$nextTick(() => {
+            Toast.clear();
+          });
+        }
+      } else {
+        Toast("请输入货位或者先查询货位!");
       }
     },
     // 清空数据
@@ -250,7 +340,7 @@ export default {
     },
   },
   mounted() {
-    this.$refs.skuInput.focus();
+    this.$refs.allocationNameInput.focus();
   },
 };
 </script>
@@ -282,10 +372,15 @@ export default {
     padding: 0 10px;
     .removeLocationInput {
       font-size: 20px;
-      margin-top: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #333;
+      .labelClass {
+        display: inline-block;
+        width: 60px;
+      }
       input {
         border: 1px solid rgb(110, 110, 110);
-        height: 40px;
+        height: 30px;
       }
     }
     .skuContent {
