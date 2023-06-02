@@ -5,6 +5,7 @@
         <van-icon name="home-o" class="goHome" @click="goHome"></van-icon
         ><span class="warehouse">默认仓库</span>
       </div>
+      <div>{{ skuOld }}</div>
       <div class="userName">{{ username }}</div>
     </div>
     <div class="content">
@@ -93,6 +94,7 @@ export default {
       removeLocation: "",
       removeLocationId: "", // 对应的id 数据
       sku: "",
+      skuOld: "",
       skuList: [], // 数据
       isShowSkuListBottom: false, // 是否显示sku
       warehouseList: [], // 可以选择的数据
@@ -111,6 +113,7 @@ export default {
     // 查询仓位id 和对应的数据
     async queryRemoveLocation() {
       if (this.sku && this.sku.trim()) {
+        this.skuOld = this.sku;
         let res = await getInventoryDetailListBySku({
           warehouseId: this.warehouseId,
           sku: this.sku.trim(),
@@ -141,7 +144,7 @@ export default {
           this.initData();
           Toast("暂无数据!");
         }
-      }else{
+      } else {
         Toast("请输入或扫描!");
       }
     },
