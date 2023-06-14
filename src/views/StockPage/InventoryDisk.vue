@@ -11,7 +11,9 @@
     <div class="content">
       <div class="removeLocationInput">
         <div style="margin-bottom: 10px">
-          <span class="labelClass">货位:</span>
+          <span class="labelClass"
+            >{{ type === "1" ? "货位" : "盘点单" }}:</span
+          >
           <input
             type="text"
             ref="allocationNameInput"
@@ -49,7 +51,15 @@
                 />
               </div>
               <div>
-                {{ item.sku }}<br />
+                {{ item.sku }}
+                <span
+                  class="isCheckedClass"
+                  v-if="
+                    item.checkActuallyAccounts ||
+                    item.checkActuallyAccounts === 0
+                  "
+                  >（已盘点）</span
+                ><br />
                 {{ item.skuName }}
               </div>
             </div>
@@ -155,6 +165,7 @@ import { Toast, ImagePreview } from "vant";
 export default {
   data() {
     return {
+      type: this.$route.query.type,
       warehouseId: process.env.VUE_APP_WAREHOUSEID,
       otherSkuShow: false,
       username: "", //用户名
@@ -168,6 +179,7 @@ export default {
   },
   created() {
     this.username = sessionStorage.getItem("username");
+    console.log(this.type);
   },
   methods: {
     // 盘点操作
@@ -182,7 +194,11 @@ export default {
         });
       }
       try {
-        await inventoryCheckAdd(list);
+        let query = {};
+        if (this.type === "2") {
+          query["type"] = 1;
+        }
+        await inventoryCheckAdd(list, query);
         Toast.success("盘点成功");
         if (flag === "many") {
           this.otherSkuShow = false;
@@ -222,11 +238,19 @@ export default {
           loadingType: "spinner",
           selector: this.$refs.searchContainerRef, // 或者直接传入 DOM 对象：selector: document.querySelector('#elementId')
         });
-        let res = await getInventoryList({
+        const data = {
           warehouseId: this.warehouseId,
-          allocationName: this.allocationNameSuccess.trim(),
           sku: this.sku.trim(),
-        });
+        };
+        if (this.type === "1") {
+          // 货位查询
+          data["allocationName"] = this.allocationNameSuccess.trim();
+        } else {
+          // 盘点单查询
+          data["checkCode"] = this.allocationNameSuccess.trim();
+          data["type"] = 1;
+        }
+        let res = await getInventoryList(data);
         if (res.data && res.data.length > 0) {
           res.data.forEach((item) => {
             item.isAllchecked = item.quantity !== item.totalQuantity;
@@ -257,11 +281,19 @@ export default {
             loadingType: "spinner",
             selector: this.$refs.searchContainerRef, // 或者直接传入 DOM 对象：selector: document.querySelector('#elementId')
           });
-          let res = await getInventoryList({
+          const data = {
             warehouseId: this.warehouseId,
-            allocationName: this.allocationName.trim(),
             sku: this.sku.trim(),
-          });
+          };
+          if (this.type === "1") {
+            // 货位查询
+            data["allocationName"] = this.allocationName.trim();
+          } else {
+            // 盘点单查询
+            data["checkCode"] = this.allocationName.trim();
+            data["type"] = 1;
+          }
+          let res = await getInventoryList(data);
           if (res.data && res.data.length > 0) {
             res.data.forEach((item) => {
               item.isAllchecked = item.quantity !== item.totalQuantity;
@@ -297,11 +329,21 @@ export default {
             loadingType: "spinner",
             selector: this.$refs.searchContainerRef, // 或者直接传入 DOM 对象：selector: document.querySelector('#elementId')
           });
-          let res = await getInventoryList({
+          const data = {
             warehouseId: this.warehouseId,
-            allocationName: this.allocationNameSuccess || this.allocationName.trim(),
             sku: this.sku.trim(),
-          });
+          };
+          if (this.type === "1") {
+            // 货位查询
+            data["allocationName"] =
+              this.allocationNameSuccess || this.allocationName.trim();
+          } else {
+            // 盘点单查询
+            data["checkCode"] =
+              this.allocationNameSuccess || this.allocationName.trim();
+            data["type"] = 1;
+          }
+          let res = await getInventoryList(data);
           if (res.data && res.data.length > 0) {
             res.data.forEach((item) => {
               item.isAllchecked = item.quantity !== item.totalQuantity;
@@ -309,7 +351,7 @@ export default {
             });
             this.skuList = res.data;
             this.sku = "";
-            this.allocationName = ""
+            this.allocationName = "";
             this.$nextTick(() => {
               Toast.clear();
             });
@@ -376,7 +418,7 @@ export default {
       border-bottom: 1px solid #333;
       .labelClass {
         display: inline-block;
-        width: 60px;
+        width: 80px;
       }
       input {
         border: 1px solid rgb(110, 110, 110);
@@ -392,6 +434,10 @@ export default {
         border: 1px solid #eee;
         padding: 6px;
         margin-bottom: 10px;
+        .isCheckedClass {
+          font-size: 12px;
+          color: red;
+        }
       }
       .vanRow {
         text-align: center;
@@ -414,6 +460,9 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        input {
+          border: 1px solid rgb(110, 110, 110);
+        }
       }
     }
   }

@@ -21,11 +21,12 @@ export function getInventoryListBySku(obj) {
 
 
 // 盘点
-export function inventoryCheckAdd(obj) {
+export function inventoryCheckAdd(obj, query) {
   return request({
     url: "/yc-busi-warehouse/warehouseFlowChart/inventory/add",
     method: "post",
-    types:"json",
-    data: obj
+    types: "json",
+    data: obj,
+    params: query
   });
 }

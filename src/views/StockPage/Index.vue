@@ -26,14 +26,26 @@
         </van-col>
         <van-col
           span="8"
-          @click="toDiskInventory"
+          @click="toDiskInventory('1')"
           style="position: relative; z-index: 9999"
         >
           <div>
             <div class="iconStyle">
               <span class="iconfont icon-panku"></span>
             </div>
-            <div class="textStyle">盘库</div>
+            <div class="textStyle">货位盘库</div>
+          </div></van-col
+        >
+        <van-col
+          span="8"
+          @click="toDiskInventory('2')"
+          style="position: relative; z-index: 9999"
+        >
+          <div>
+            <div class="iconStyle">
+              <span class="iconfont icon-panku"></span>
+            </div>
+            <div class="textStyle">盘点单盘库</div>
           </div></van-col
         >
       </van-row>
@@ -56,8 +68,8 @@ export default {
     skuSeparation() {
       this.$router.push({ name: "SkuSeparationNew" });
     },
-    toDiskInventory() {
-      this.$router.push({ name: "InventoryDisk" });
+    toDiskInventory(type) {
+      this.$router.push({ name: "InventoryDisk", query: { type } });
     },
   },
   created() {},
