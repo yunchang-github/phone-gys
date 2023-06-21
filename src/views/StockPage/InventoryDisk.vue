@@ -241,6 +241,7 @@ export default {
         const data = {
           warehouseId: this.warehouseId,
           sku: this.sku.trim(),
+          status:1
         };
         if (this.type === "1") {
           // 货位查询
@@ -284,6 +285,7 @@ export default {
           const data = {
             warehouseId: this.warehouseId,
             sku: this.sku.trim(),
+            status:1
           };
           if (this.type === "1") {
             // 货位查询
@@ -332,6 +334,7 @@ export default {
           const data = {
             warehouseId: this.warehouseId,
             sku: this.sku.trim(),
+            status:1
           };
           if (this.type === "1") {
             // 货位查询

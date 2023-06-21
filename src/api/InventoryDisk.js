@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-//  移入移出操作
+//  页面查询
 export function getInventoryList(obj) {
   return request({
     url: "/yc-busi-warehouse/warehouseFlowChart/check/inventory/list",
@@ -10,7 +10,7 @@ export function getInventoryList(obj) {
 }
 
 
-//  移入移出操作
+//  明细查询
 export function getInventoryListBySku(obj) {
   return request({
     url: "/yc-busi-warehouse/warehouseFlowChart/check/inventory/BySku",
