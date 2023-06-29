@@ -60,6 +60,7 @@
                   "
                   >（已盘点）</span
                 ><br />
+                <span v-if="type === '2'">{{ item.allocationName }} <br /></span>
                 {{ item.skuName }}
               </div>
             </div>
@@ -241,7 +242,7 @@ export default {
         const data = {
           warehouseId: this.warehouseId,
           sku: this.sku.trim(),
-          status:1
+          status: 1,
         };
         if (this.type === "1") {
           // 货位查询
@@ -285,7 +286,7 @@ export default {
           const data = {
             warehouseId: this.warehouseId,
             sku: this.sku.trim(),
-            status:1
+            status: 1,
           };
           if (this.type === "1") {
             // 货位查询
@@ -334,7 +335,7 @@ export default {
           const data = {
             warehouseId: this.warehouseId,
             sku: this.sku.trim(),
-            status:1
+            status: 1,
           };
           if (this.type === "1") {
             // 货位查询
