@@ -35,3 +35,23 @@ export function postWarehouseFlowChartInsert(obj) {
     data: obj
   });
 }
+
+// 根据fnsku 获取asin
+export function selFnskuQueryAsin(query) {
+  return request({
+    url: "/yc-busi-logistics/phone/wl/selFnskuQueryAsin",
+    method: "get",
+    params: query
+  });
+}
+
+
+// 上传图片
+export function uploadPictures(data) {
+  return request({
+    url: "/yc-busi-logistics/phone/wl/uploadPictures",
+    method: "post",
+    data,
+    isNotHandle:true
+  });
+}

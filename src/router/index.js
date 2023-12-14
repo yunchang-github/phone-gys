@@ -7,6 +7,10 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
+    redirect: 'login',
+  },
+  {
+    path: "/login",
     name: "Login",
     component: Login
   },
@@ -60,7 +64,11 @@ const routes = [
     name: "skuSeparationDetail",
     component: resolve => require(["@/views/StockPage/SkuSeparationDetail.vue"], resolve)
   },
-  
+  {
+    path: "/transparentLabel",
+    name: "TransparentLabel",
+    component: resolve => require(["@/views/StockPage/transparentLabel.vue"], resolve)
+  },
 ];
 
 const router = new VueRouter({

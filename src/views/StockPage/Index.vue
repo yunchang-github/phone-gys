@@ -49,6 +49,20 @@
           </div></van-col
         >
       </van-row>
+      <van-row style="margin-top: 16px">
+        <van-col
+          span="8"
+          @click="transparentLabel"
+          style="position: relative; z-index: 9999"
+        >
+          <div>
+            <div class="iconStyle">
+              <span class="iconfont icon-shangchuan_huaban"></span>
+            </div>
+            <div class="textStyle">透明标图片上传</div>
+          </div></van-col
+        >
+      </van-row>
     </div>
   </div>
 </template>
@@ -70,6 +84,10 @@ export default {
     },
     toDiskInventory(type) {
       this.$router.push({ name: "InventoryDisk", query: { type } });
+    },
+    // 透明标回收页面
+    transparentLabel() {
+      this.$router.push({ name: "TransparentLabel" });
     },
   },
   created() {},

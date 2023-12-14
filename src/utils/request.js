@@ -41,9 +41,6 @@ service.interceptors.request.use(
     // 是否需要设置 token
     let { method, requestType, data, types, params } = config;
     const isToken = sessionStorage.getItem("factoryToken");
-    if (config.types == "json") {
-      config.headers["Content-Type"] = "application/json; charset=UTF-8";
-    }
     config.headers["Authorization"] = isToken || "Basic eWM6c2VjcmV0"; // 让每个请求携带自定义token 请根据实际情况自行修改
     if (params) {
       let url = config.url + "?" + tansParams(params);
@@ -56,7 +53,7 @@ service.interceptors.request.use(
       config["data"] = JSON.stringify(data);
       config.headers["Content-Type"] = "application/json; charset=UTF-8";
     } else {
-      if (requestType !== "upload") {
+      if (requestType !== "upload" && !config.isNotHandle) {
         if (method === "post" || method === "POST") {
           config["data"] = Qs.stringify(data, { indices: false });
         }
