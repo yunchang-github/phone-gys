@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "712429",
+      "name": "成功",
+      "font_class": "success",
+      "unicode": "e672",
+      "unicode_decimal": 58994
+    },
+    {
+      "icon_id": "2849288",
+      "name": "失败",
+      "font_class": "danger",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "15311736",
+      "name": "警告",
+      "font_class": "warn",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "25536564",
+      "name": "Product management specification",
+      "font_class": "a-Productmanagementspecification",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "11758219",
+      "name": "回收",
+      "font_class": "huishou",
+      "unicode": "e74f",
+      "unicode_decimal": 59215
+    },
+    {
       "icon_id": "12661392",
       "name": "上传",
       "font_class": "shangchuan_huaban",

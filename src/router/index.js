@@ -69,6 +69,16 @@ const routes = [
     name: "TransparentLabel",
     component: resolve => require(["@/views/StockPage/transparentLabel.vue"], resolve)
   },
+  {
+    path: "/OutStockPage",
+    name: "OutStockPage",
+    component: resolve => require(["@/views/OutStockPage/Index.vue"], resolve)
+  },
+  {
+    path: "/FullBoxOutboundScan",
+    name: "FullBoxOutboundScan",
+    component: resolve => require(["@/views/OutStockPage/FullBoxOutboundScan.vue"], resolve)
+  },
 ];
 
 const router = new VueRouter({

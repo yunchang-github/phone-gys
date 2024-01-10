@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3610877 */
-  src: url('iconfont.woff2?t=1702540870158') format('woff2'),
-       url('iconfont.woff?t=1702540870158') format('woff'),
-       url('iconfont.ttf?t=1702540870158') format('truetype');
+  src: url('iconfont.woff2?t=1704792250543') format('woff2'),
+       url('iconfont.woff?t=1704792250543') format('woff'),
+       url('iconfont.ttf?t=1704792250543') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,26 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-success:before {
+  content: "\e672";
+}
+
+.icon-danger:before {
+  content: "\e645";
+}
+
+.icon-warn:before {
+  content: "\e60b";
+}
+
+.icon-a-Productmanagementspecification:before {
+  content: "\e61f";
+}
+
+.icon-huishou:before {
+  content: "\e74f";
 }
 
 .icon-shangchuan_huaban:before {

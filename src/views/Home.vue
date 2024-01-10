@@ -14,11 +14,14 @@
       </div>
       <div class="btnBox">
         <div class="iconStyle">
-          <span class="iconfont icon-ruku" @click="goList"></span>
+          <span
+            class="iconfont icon-ruku"
+            @click="goToOtherPage('Factory')"
+          ></span>
           <p class="iconTitle">入库</p>
         </div>
         <div>
-          <span @click="goStockPage">
+          <span @click="goToOtherPage('StockPage')">
             <svg class="icon kucuntongji" aria-hidden="true">
               <use xlink:href="#icon-kucuntongji"></use>
             </svg>
@@ -26,7 +29,10 @@
           <p class="iconTitle1">库存</p>
         </div>
         <div class="iconStyle">
-          <span class="iconfont icon-chuku"></span>
+          <span
+            class="iconfont icon-chuku"
+            @click="goToOtherPage('OutStockPage')"
+          ></span>
           <p class="iconTitle">出库</p>
         </div>
       </div>
@@ -42,11 +48,9 @@ export default {
     };
   },
   methods: {
-    goList() {
-      this.$router.push({ name: "Factory" });
-    },
-    goStockPage() {
-      this.$router.push({ name: "StockPage" });
+    // 去其他页面
+    goToOtherPage(pageName) {
+      this.$router.push({ name: pageName });
     },
   },
   created() {
