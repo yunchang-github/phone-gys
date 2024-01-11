@@ -35,6 +35,7 @@ export function postWarehouseFlowChartInsert(obj) {
     data: obj
   });
 }
+// swagger 中的名字 adjustment-warehouse-location-controller
 
 // 根据fnsku 获取asin
 export function selFnskuQueryAsin(query) {
@@ -53,5 +54,13 @@ export function uploadPictures(data) {
     method: "post",
     data,
     isNotHandle:true
+  });
+}
+// 透明标回收
+export function pdaTransparentLabelSendBack(query) {
+  return request({
+    url: "/yc-busi-logistics/phone/wl/pdaTransparentLabelSendBack",
+    method: "get",
+    params: query
   });
 }

@@ -70,6 +70,11 @@ const routes = [
     component: resolve => require(["@/views/StockPage/transparentLabel.vue"], resolve)
   },
   {
+    path: "/transparentRecovery",
+    name: "transparentRecovery",
+    component: resolve => require(["@/views/StockPage/transparentRecovery.vue"], resolve)
+  },
+  {
     path: "/OutStockPage",
     name: "OutStockPage",
     component: resolve => require(["@/views/OutStockPage/Index.vue"], resolve)

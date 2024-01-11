@@ -62,6 +62,18 @@
             <div class="textStyle">透明标图片上传</div>
           </div></van-col
         >
+         <van-col
+          span="8"
+          @click="transparentRecovery"
+          style="position: relative; z-index: 9999"
+        >
+          <div>
+            <div class="iconStyle">
+              <span class="iconfont icon-huishou"></span>
+            </div>
+            <div class="textStyle">透明标退回</div>
+          </div></van-col
+        >
       </van-row>
     </div>
   </div>
@@ -85,9 +97,13 @@ export default {
     toDiskInventory(type) {
       this.$router.push({ name: "InventoryDisk", query: { type } });
     },
-    // 透明标回收页面
+    // 透明标图片上传
     transparentLabel() {
       this.$router.push({ name: "TransparentLabel" });
+    },
+    // 透明标回收
+    transparentRecovery(){
+      this.$router.push({ name: "transparentRecovery" });
     },
   },
   created() {},
