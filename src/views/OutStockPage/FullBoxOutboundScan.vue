@@ -95,6 +95,7 @@
     <van-popup
       v-model="dialogShow"
       class="dialogClass"
+      :style="{ height: !clickCloseFlag ? '35%' : '30%' }"
       :close-on-click-overlay="clickCloseFlag"
     >
       <div class="tipIconClass">
@@ -131,12 +132,14 @@ import {
   updateCaseScanStatus,
   replaceBoxNo,
 } from "@/api/FullBoxOutboundScan.js";
-import Speech from "speak-tts"; // es6
+import chongfu from "@/assets/chongfu.mp3";
+import chenggong from "@/assets/chenggong.mp3";
+import cuowu from "@/assets/cuowu.mp3";
+import tihuanchenggong from "@/assets/tihuanchenggong.mp3";
 import { Toast } from "vant";
 export default {
   data() {
     return {
-      speech: {},
       readonly: false,
       autoFocus: false,
       shipmentId: undefined,
@@ -370,35 +373,19 @@ export default {
       this.$router.go(-1);
     },
     webSpeakFun(speakVal) {
-      this.speech.speak({ text: speakVal }).then(() => {
-        this.speech.cancel(); //播放结束后调用
-      });
-      //   try {
-      //     const utterance = new SpeechSynthesisUtterance(speakVal);
-      //     // 获取 SpeechSynthesis 实例
-      //     const synth = window.speechSynthesis;
-      //     // 播放语音
-      //     synth.speak(utterance);
-      //   } catch (e) {
-      //     console.log(e);
-      //     this.customTipDialog(
-      //       {
-      //         icon: "icon-danger",
-      //         message: e, //查询条件为空
-      //       },
-      //       0
-      //     );
-      //   }
+      let mp3 = null;
+      if (speakVal === "重复") {
+        mp3 = chongfu;
+      } else if (speakVal === "成功") {
+        mp3 = chenggong;
+      } else if (speakVal === "错误") {
+        mp3 = cuowu;
+      } else if (speakVal === "替换成功") {
+        mp3 = tihuanchenggong;
+      }
+      var audio = new Audio(mp3);
+      audio.play();
     },
-
-    speechInit() {
-      this.speech = new Speech();
-      this.speech.setLanguage("zh-CN");
-      this.speech.init().then(() => {
-        console.log("语音播报初始化完成");
-      });
-    },
-
     tableClickBtn(row, prop) {
       if (prop === "boxNo") {
         this.boxNo = row[prop];
@@ -439,7 +426,6 @@ export default {
     },
   },
   mounted() {
-    this.speechInit();
     this.autoFocus = true;
     this.$nextTick(() => {
       this.$refs["input1Ref"] && this.$refs["input1Ref"].focus();
@@ -549,7 +535,7 @@ export default {
   }
   .dialogClass {
     width: 60%;
-    height: 25%;
+    height: 35%;
     padding: 20px;
     .tipIconClass {
       text-align: center;
