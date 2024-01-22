@@ -20,19 +20,12 @@
             @keydown.enter="input1Enter"
             @focus="stopKeyborad"
             :readonly="readonly"
-            :style="{ flex: isCanSuccessScan ? '' : 1 }"
           />
-          <div class="btnClass" v-if="isCanSuccessScan">
-            <van-button type="primary" size="small" @click="replaceSuccessBtn"
-              >完成扫描</van-button
-            >
-          </div>
           <!-- :disabled="shipmentIdSuccess" -->
         </div>
         <div class="inputItemClass">
           <span class="labelClass">箱子编号:</span>
           <input
-            class="input2Class"
             type="text"
             ref="input2Ref"
             v-model.trim="boxNo"
@@ -85,23 +78,9 @@
                   >
                     <template v-for="(option, i) in tableColumns">
                       <td :width="option.width" align="center" :key="i">
-                        <template
-                          v-if="option.prop === 'scannedQuantity/totality'"
-                        >
-                          <span
-                            :style="{
-                              color:
-                                row.status !== '已扫描' &&
-                                row.scannedQuantity > 0
-                                  ? '#52c41a'
-                                  : '',
-                            }"
-                            >{{ row.scannedQuantity }}</span
-                          >/<span>{{ row.totality }}</span>
-                        </template>
-                        <template v-else>
-                          <span>{{ row[option.prop] }}</span>
-                        </template>
+                        <span @click="tableClickBtn(row, option.prop)">{{
+                          row[option.prop]
+                        }}</span>
                       </td>
                     </template>
                   </tr>
@@ -138,15 +117,8 @@
       <!-- 说明已经全部扫描完成 -->
       <template v-if="!clickCloseFlag">
         <div style="text-align: center">
-          <van-button
-            style="margin-right: 1em"
-            type="default"
-            size="small"
-            @click="dialogShow = false"
-            >取消</van-button
-          >
-          <van-button type="info" size="small" @click="confirmSuccessBtn"
-            >确认完成</van-button
+          <van-button type="info" size="small" @click="replaceSuccessBtn"
+            >完成</van-button
           >
         </div>
       </template>
@@ -157,7 +129,6 @@
   <script>
 import {
   selDemandBoxNo,
-  getNewBoxNo,
   updateCaseScanStatus,
   replaceBoxNo,
 } from "@/api/FullBoxOutboundScan.js";
@@ -177,7 +148,6 @@ export default {
       boxNoSuccess: undefined,
       loading: false,
       tableHeight: 400,
-      isCanSuccessScan: false,
       tableData: [],
       tableDataOrg: [],
       tableColumns: [
@@ -187,13 +157,13 @@ export default {
           width: 40,
         },
         {
-          label: "海外仓箱号",
-          prop: "overseaBoxNo",
+          label: "箱子编号",
+          prop: "boxNo",
         },
         {
-          label: "已扫描数/总数",
-          prop: "scannedQuantity/totality",
-          width: 110,
+          label: "状态",
+          prop: "status",
+          width: 60,
         },
       ],
       deliveryType: 1, //fba
@@ -268,86 +238,76 @@ export default {
     // boxNo
     async input2Enter() {
       if (this.inputEnter("boxNo", "箱子编号", "input2Ref")) return;
-      try {
-        // 获取新箱号
-        const { data: newBoxNoList } = await getNewBoxNo({
-          shipmentId: this.shipmentIdSuccess,
+      let currentItem = this.tableData.find(
+        (item) => item.boxNo === this.boxNo
+      );
+      if (!currentItem) {
+        this.dataClear("boxNo", "input2Ref");
+        // 语言播报
+        this.webSpeakFun(`错误`);
+        return this.customTipDialog({
+          icon: "icon-danger",
+          message: `此箱子，不属于该发货计划<br>请重新扫描`, //查询条件为空
         });
-        let newBoxNo = "";
-        if (newBoxNoList.length === 0) {
-          newBoxNo = this.shipmentIdSuccess + "U000001";
-        } else {
-          newBoxNo = this.getBoxNoByStr(newBoxNoList[0].newBoxNo);
-        }
+      }
+      if (currentItem.status === "已扫描") {
+        // 语言播报
+        this.webSpeakFun(`重复`);
+        this.dataClear("boxNo", "input2Ref");
+        return this.customTipDialog({
+          icon: "icon-warn",
+          message: `此箱子已扫描<br>请扫描其他箱子`, //查询条件为空
+        });
+      }
+      try {
         const data = {
-          shipmentId: this.shipmentIdSuccess,
-          originalBoxNo: this.boxNo,
-          newBoxNo,
+          //   shipmentId: this.shipmentId,
+          boxNo: this.boxNo,
         };
         await updateCaseScanStatus(data);
+        currentItem.status = "已扫描";
         // 语言播报
         this.webSpeakFun(`成功`);
+        this.allScanSuccessFun(); //置底加是否全部扫描
         this.boxNoSuccess = this.boxNo;
       } catch (e) {
         // 语言播报
-        this.webSpeakFun(`错误`);
+        this.webSpeakFun(`失败`);
         this.boxNoSuccess = undefined;
         console.log(e);
       } finally {
         this.dataClear("boxNo", "input2Ref");
         // this.boxNo = undefined;
-        this.getMainTable();
+        // this.getMainTable();
       }
     },
     // 完成替换按钮点击
     async replaceSuccessBtn() {
-      let isAllSuccessFlag = this.tableData.every(
-        (item) => item.status === "已扫描"
-      );
-      if (!isAllSuccessFlag) {
-        this.clickCloseFlag = false;
-        // 未全部扫描 跳出弹窗
-        this.customTipDialog(
-          {
-            icon: "icon-warn",
-            message: `此计划中还有箱子未扫描<br>是否确认要完成`,
-          },
-          0
-        );
-      } else {
-        this.clickCloseFlag = true;
-        this.replaceSuccessFun();
-      }
-    },
-    // 确认完成
-    confirmSuccessBtn() {
+      let newBoxNo = "";
+      this.tableDataOrg.forEach((item, i) => {
+        if (i === 0) {
+          newBoxNo = this.shipmentIdSuccess + "U000001";
+        } else {
+          newBoxNo = this.getBoxNoByStr(newBoxNo);
+        }
+        item.newBoxNo = newBoxNo;
+      });
       this.dialogShow = false;
       this.clickCloseFlag = true;
-      this.replaceSuccessFun();
-    },
-    // 替换接口动作
-    async replaceSuccessFun() {
-      try {
-        const { data: msg } = await replaceBoxNo({
-          shipmentId: this.shipmentIdSuccess,
-        });
-        let delay = msg === "操作成功" ? 1000 : 3000;
-        // 语言播报
-        this.webSpeakFun(`替换成功`);
-        this.tableData = [];
-        this.customTipDialog(
-          {
-            icon: "icon-success",
-            message: msg, //查询条件为空
-          },
-          delay
-        );
-        return this.dataClear("shipmentId", "input1Ref");
-      } catch (e) {
-        this.webSpeakFun(`错误`);
-        this.getMainTable();
-        console.log(e);
-      }
+      await replaceBoxNo(this.tableDataOrg, {
+        shipmentId: this.shipmentIdSuccess,
+      });
+      // 语言播报
+      this.webSpeakFun(`替换成功`);
+      this.tableData = [];
+      this.customTipDialog(
+        {
+          icon: "icon-success",
+          message: `全部替换成功`, //查询条件为空
+        },
+        1000
+      );
+      return this.dataClear("shipmentId", "input1Ref");
     },
     // 全部扫描完成动作
     allScanSuccessFun() {
@@ -361,6 +321,21 @@ export default {
           return a.index - b.index; // 根据index正序排序
         }
       });
+      let isAllSuccessFlag = this.tableData.every(
+        (item) => item.status === "已扫描"
+      );
+      if (isAllSuccessFlag) {
+        this.clickCloseFlag = false;
+        this.customTipDialog(
+          {
+            icon: "icon-success",
+            message: `已全部扫描完成`, //查询条件为空
+          },
+          0
+        );
+      } else {
+        this.clickCloseFlag = true;
+      }
     },
     async getMainTable() {
       try {
@@ -378,12 +353,8 @@ export default {
         });
         res.forEach((item, i) => {
           item.index = i + 1;
-          item.status =
-            item.scannedQuantity === item.totality && item.totality > 0
-              ? "已扫描"
-              : "未扫描";
+          item.status = item.scanStatus === 1 ? "已扫描" : "未扫描";
         });
-        this.isCanSuccessScan = res.some((item) => item.scannedQuantity > 0);
         this.tableData = res;
         this.allScanSuccessFun(); //置底加是否全部扫描
         this.shipmentIdSuccess = this.shipmentId;
@@ -494,30 +465,23 @@ export default {
   .contentclass {
     padding: 0 10px;
     .inputsClass {
-      font-size: 16px;
+      font-size: 18px;
       padding: 10px 0;
       border-bottom: 1px solid #333;
       .inputItemClass {
         display: flex;
         align-items: center;
         .labelClass {
-          width: 100px;
-        }
-        .btnClass {
-          text-align: right;
-          flex: 1;
+          width: 120px;
         }
         input {
-          font-size: 14px;
-          width: 170px;
+          font-size: 16px;
+          flex: 1;
           border: 1px solid rgb(110, 110, 110);
           height: 30px;
         }
         input:disabled {
           background-color: #f0f0f0;
-        }
-        .input2Class {
-          flex: 1;
         }
       }
     }
