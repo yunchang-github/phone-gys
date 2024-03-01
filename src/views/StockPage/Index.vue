@@ -62,7 +62,7 @@
             <div class="textStyle">透明标图片上传</div>
           </div></van-col
         >
-         <van-col
+        <van-col
           span="8"
           @click="transparentRecovery"
           style="position: relative; z-index: 9999"
@@ -72,6 +72,18 @@
               <span class="iconfont icon-huishou"></span>
             </div>
             <div class="textStyle">透明标退回</div>
+          </div></van-col
+        >
+        <van-col
+          span="8"
+          @click="packageToInventory"
+          style="position: relative; z-index: 9999"
+        >
+          <div>
+            <div class="iconStyle">
+              <span class="iconfont icon-package"></span>
+            </div>
+            <div class="textStyle">整箱盘点</div>
           </div></van-col
         >
       </van-row>
@@ -102,8 +114,11 @@ export default {
       this.$router.push({ name: "TransparentLabel" });
     },
     // 透明标回收
-    transparentRecovery(){
+    transparentRecovery() {
       this.$router.push({ name: "transparentRecovery" });
+    },
+    packageToInventory() {
+      this.$router.push({ name: "packageToInventory" });
     },
   },
   created() {},
