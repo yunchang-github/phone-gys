@@ -160,6 +160,7 @@ import {
   getNewBoxNo,
   updateCaseScanStatus,
   replaceBoxNo,
+  selOverseaBoxNoByBoxNo,
 } from "@/api/FullBoxOutboundScan.js";
 import chongfu from "@/assets/chongfu.mp3";
 import chenggong from "@/assets/chenggong.mp3";
@@ -179,7 +180,6 @@ export default {
       tableHeight: 400,
       isCanSuccessScan: false,
       tableData: [],
-      tableDataOrg: [],
       tableColumns: [
         {
           label: "序号",
@@ -269,20 +269,44 @@ export default {
     async input2Enter() {
       if (this.inputEnter("boxNo", "箱子编号", "input2Ref")) return;
       try {
+        //判断 海外仓箱号 已扫描数要总数
+        const { data: currentBoxName } = await selOverseaBoxNoByBoxNo({
+          boxNo: this.boxNo,
+        });
+        let currentRow = this.tableData.find(
+          (item) => item.overseaBoxNo === currentBoxName
+        );
+        if (!currentRow) {
+          return Toast.fail({
+            message: `未找到箱号为${this.boxNo}的对应海外仓箱号`,
+            position: "center",
+          });
+        }
+        if (currentRow.status === "已扫描") {
+          return Toast.fail({
+            message: `海外仓箱号为${currentRow.overseaBoxNo}已扫描完成，无法继续扫描`,
+            position: "center",
+          });
+        }
         // 获取新箱号
         const { data: newBoxNoList } = await getNewBoxNo({
           shipmentId: this.shipmentIdSuccess,
         });
         let newBoxNo = "";
+        let boxName = "";
         if (newBoxNoList.length === 0) {
           newBoxNo = this.shipmentIdSuccess + "U000001";
+          boxName = `P1-B1`;
         } else {
           newBoxNo = this.getBoxNoByStr(newBoxNoList[0].newBoxNo);
+          let boxNameIndex = Number(newBoxNo.slice(-6));
+          boxName = `P1-B${boxNameIndex}`;
         }
         const data = {
           shipmentId: this.shipmentIdSuccess,
           originalBoxNo: this.boxNo,
           newBoxNo,
+          boxName,
         };
         await updateCaseScanStatus(data);
         // 语言播报
@@ -372,10 +396,6 @@ export default {
         //   let scanCountSum = 0,
         //     boxCountSum = 0;
         const { data: res } = await selDemandBoxNo(params);
-        // 存一份原始数据的顺序
-        this.tableDataOrg = res.map((item) => {
-          return { oldBoxNo: item.boxNo };
-        });
         res.forEach((item, i) => {
           item.index = i + 1;
           item.status =

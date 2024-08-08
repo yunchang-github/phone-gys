@@ -41,3 +41,15 @@ export function replaceBoxNo(params) {
         isShowLoading: true
     })
 }
+
+
+
+// 通过箱号查对应的箱名
+export function selOverseaBoxNoByBoxNo(params) {
+    return request({
+        url: '/yc-busi-warehouse/boxReplace/selOverseaBoxNoByBoxNo',
+        method: 'get',
+        params,
+        isShowLoading: true
+    })
+}
